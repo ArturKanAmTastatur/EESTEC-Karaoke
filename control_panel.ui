@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1090</width>
-    <height>740</height>
+    <height>746</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -122,7 +122,11 @@
             <item>
              <layout class="QVBoxLayout" name="verticalLayout_3">
               <item>
-               <widget class="QLineEdit" name="editURL"/>
+               <widget class="QLineEdit" name="editURL">
+                <property name="text">
+                 <string/>
+                </property>
+               </widget>
               </item>
               <item>
                <widget class="QLineEdit" name="editTitle"/>
@@ -145,7 +149,13 @@
           <property name="minimumSize">
            <size>
             <width>390</width>
-            <height>300</height>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>100</height>
            </size>
           </property>
           <property name="text">
@@ -154,22 +164,38 @@
          </widget>
         </item>
         <item>
-         <spacer name="verticalSpacer">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
+         <widget class="QYouTubePlayer" name="displayWidget" native="true">
+          <property name="minimumSize">
            <size>
-            <width>346</width>
-            <height>68</height>
+            <width>390</width>
+            <height>220</height>
            </size>
           </property>
-         </spacer>
+          <property name="maximumSize">
+           <size>
+            <width>390</width>
+            <height>220</height>
+           </size>
+          </property>
+         </widget>
         </item>
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_4">
           <item>
-           <widget class="QDial" name="dialSound"/>
+           <widget class="QDial" name="dialSound">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>120</width>
+              <height>0</height>
+             </size>
+            </property>
+           </widget>
           </item>
           <item>
            <spacer name="horizontalSpacer">
@@ -185,7 +211,14 @@
            </spacer>
           </item>
           <item>
-           <widget class="QDial" name="dialVibe"/>
+           <widget class="QDial" name="dialVibe">
+            <property name="minimumSize">
+             <size>
+              <width>120</width>
+              <height>0</height>
+             </size>
+            </property>
+           </widget>
           </item>
          </layout>
         </item>
@@ -220,7 +253,7 @@
                <string>Edit Mode</string>
               </property>
               <property name="checkable">
-               <bool>true</bool>
+               <bool>false</bool>
               </property>
              </widget>
             </item>
@@ -269,6 +302,14 @@
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>QYouTubePlayer</class>
+   <extends>QWidget</extends>
+   <header>QYouTubePlayer</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

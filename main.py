@@ -1,12 +1,12 @@
 import io
+import re
 import sys
 
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, QUrl
 
-import exceptions
-import requests
-
-from exceptions import AbsentURLException
+from QYouTubePlayer import QYouTubePlayer
+from youtubeInteraction import *
+from exceptions import *
 
 from PyQt6 import uic
 from PyQt6.QtWidgets import (
@@ -14,27 +14,9 @@ from PyQt6.QtWidgets import (
     QWidget, QAbstractItemView, QListWidgetItem
 )
 from PyQt6.QtCore import QObject, pyqtSignal
+from PyQt6.QtWebEngineWidgets import QWebEngineView
 
-def youtube_video_exists(url):
-    r = requests.get(
-        "https://www.youtube.com/oembed",
-        params={"url": url, "format": "json"},
-        timeout=5,
-    )
-    if (r.status_code == 200):
-        return True
-    else:
-        raise exceptions.InvalidURLException()
 
-def get_youtube_title(url):
-    check = youtube_video_exists(url)
-    r = requests.get(
-        "https://www.youtube.com/oembed",
-        params={"url": url, "format": "json"},
-        timeout=5,
-    )
-    if r.status_code == 200:
-        return r.json()["title"]
 
 
 class SongCard(QWidget):
@@ -42,23 +24,30 @@ class SongCard(QWidget):
         super().__init__()
         uic.loadUi("songcard.ui", self)
         self.stackedWidget.setCurrentIndex(0)
+
         self.url = url
         self.cardInfo = title + ("" if customer == "" else (" for " + customer))
-        print(customer, self.cardInfo)
+
         self.labelTitle.setText(self.cardInfo)
 
+
 class KaraokeMain(QMainWindow):
+    song_signal = pyqtSignal(str)  # song
+    command_signal = pyqtSignal(int, str)  # signal type, additional info
+
     def __init__(self):
         super().__init__()
-        uic.loadUi("template.ui", self)
+        uic.loadUi("control_panel.ui", self)
+
         self.initUI()
 
     def initUI(self):
-        self.setWindowTitle("EESTEC Karaoke")
+        self.setWindowTitle("EESTEC Karaoke Control Panel")
         self.setFixedSize(1090, 740)
 
         self.labelError.setText("")
         self.playButton.setChecked(False)
+        self.displayWidget.command("setVolume", 0)
 
         self.songList.setDragDropMode(
             QAbstractItemView.DragDropMode.InternalMove
@@ -68,14 +57,29 @@ class KaraokeMain(QMainWindow):
         )
 
         self.addButton.clicked.connect(self.add_song)
-        self.playButton.clicked.connect(self.play_song)
+        self.playButton.clicked.connect(self.play_stop)
 
-    def play_song(self, checked):
+    def play_stop(self, checked):
         try:
             if checked:
                 self.playButton.setText("Stop ⏸")
+                self.displayWidget.command("playVideo")
+                self.command_signal.emit(1, "")
             else:
                 self.playButton.setText("Play ▶")
+                self.displayWidget.command("pauseVideo")
+                self.command_signal.emit(0, "")
+        except Exception as e:
+            print(e)
+
+    def play_song(self, id):
+        try:
+            if not self.playButton.isChecked():
+                self.playButton.setChecked(True)
+                self.play_stop(True)
+
+            self.displayWidget.play_video(id, True)
+            self.song_signal.emit(id)
         except Exception as e:
             print(e)
 
@@ -107,17 +111,56 @@ class KaraokeMain(QMainWindow):
             self.editTitle.setText("")
             self.editCustomer.setText("")
 
+            firstCard = self.songList.itemWidget(self.songList.item(0))
+            print(firstCard)
+            print(songCard)
+
+            if (firstCard == songCard):
+                self.play_song(get_youtube_video_id(url))
+
         except AbsentURLException:
             self.labelError.setText("URL cannot be empty")
-        except exceptions.InvalidURLException:
+        except InvalidURLException:
             self.labelError.setText("URL is invalid or video is private.")
         except Exception as e:
             print(e)
 
 
+class KaraokeDisplay(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        uic.loadUi("display.ui", self)
+
+        self.setWindowTitle("EESTEC Karaoke Display")
+
+    def play_stop(self, checked):
+        try:
+            if checked == 1:
+                self.displayWidget.command("playVideo")
+            else:
+                self.displayWidget.command("pauseVideo")
+        except Exception as e:
+            print(e)
+
+    def signal_receiver(self, signal, aux):
+        if signal in [0, 1]:
+            self.play_stop(signal)
+
+    def play_song(self, id):
+        try:
+            self.displayWidget.play_video(id)
+        except Exception as e:
+            print(e)
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    window = KaraokeMain()
-    window.show()
+    control_panel = KaraokeMain()
+    display = KaraokeDisplay()
+
+    control_panel.command_signal.connect(display.signal_receiver)
+    control_panel.song_signal.connect(display.play_song)
+
+    control_panel.show()
+    display.show()
     app.exec()
