@@ -49,6 +49,8 @@ class KaraokeMain(QMainWindow):
         self.playButton.setChecked(False)
         self.displayWidget.command("setVolume", 0)
 
+        self.currentSong = None
+
         self.songList.setDragDropMode(
             QAbstractItemView.DragDropMode.InternalMove
         )
@@ -58,6 +60,7 @@ class KaraokeMain(QMainWindow):
 
         self.addButton.clicked.connect(self.add_song)
         self.playButton.clicked.connect(self.play_stop)
+        self.songList.model().rowsMoved.connect(self.check_current_song)
 
     def play_stop(self, checked):
         try:
@@ -82,6 +85,10 @@ class KaraokeMain(QMainWindow):
             self.song_signal.emit(id)
         except Exception as e:
             print(e)
+
+    def next_song(self):
+        self.songList.takeItem(0)
+        self.check_current_song()
 
     def add_song(self):
         url = self.editURL.text()
@@ -111,12 +118,7 @@ class KaraokeMain(QMainWindow):
             self.editTitle.setText("")
             self.editCustomer.setText("")
 
-            firstCard = self.songList.itemWidget(self.songList.item(0))
-            print(firstCard)
-            print(songCard)
-
-            if (firstCard == songCard):
-                self.play_song(get_youtube_video_id(url))
+            self.check_current_song()
 
         except AbsentURLException:
             self.labelError.setText("URL cannot be empty")
@@ -124,6 +126,12 @@ class KaraokeMain(QMainWindow):
             self.labelError.setText("URL is invalid or video is private.")
         except Exception as e:
             print(e)
+
+    def check_current_song(self):
+        curentSong = self.songList.itemWidget(self.songList.item(0))
+        if (self.currentSong != curentSong):
+            self.currentSong = curentSong
+            self.play_song(get_youtube_video_id(self.currentSong.url))
 
 
 class KaraokeDisplay(QMainWindow):
@@ -160,6 +168,8 @@ if __name__ == '__main__':
 
     control_panel.command_signal.connect(display.signal_receiver)
     control_panel.song_signal.connect(display.play_song)
+
+    display.displayWidget.video_ended.connect(control_panel.next_song)
 
     control_panel.show()
     display.show()
