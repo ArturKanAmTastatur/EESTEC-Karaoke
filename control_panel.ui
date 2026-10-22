@@ -164,18 +164,28 @@
          </widget>
         </item>
         <item>
-         <widget class="QYouTubePlayer" name="displayWidget" native="true">
-          <property name="minimumSize">
-           <size>
-            <width>390</width>
-            <height>220</height>
-           </size>
-          </property>
+         <widget class="QLabel" name="label_2">
           <property name="maximumSize">
            <size>
-            <width>390</width>
-            <height>220</height>
+            <width>16777215</width>
+            <height>30</height>
            </size>
+          </property>
+          <property name="text">
+           <string>Now Playing:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="currentSongLabel">
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="text">
+           <string/>
           </property>
          </widget>
         </item>
@@ -194,6 +204,9 @@
               <width>120</width>
               <height>0</height>
              </size>
+            </property>
+            <property name="maximum">
+             <number>100</number>
             </property>
            </widget>
           </item>
@@ -248,7 +261,7 @@
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_3">
             <item>
-             <widget class="QPushButton" name="pushButton_5">
+             <widget class="QPushButton" name="editModeButton">
               <property name="text">
                <string>Edit Mode</string>
               </property>
@@ -302,14 +315,6 @@
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>QYouTubePlayer</class>
-   <extends>QWidget</extends>
-   <header>QYouTubePlayer</header>
-   <container>1</container>
-  </customwidget>
- </customwidgets>
  <resources/>
  <connections/>
 </ui>

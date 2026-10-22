@@ -3,3 +3,6 @@ class AbsentURLException(Exception):
 
 class InvalidURLException(Exception):
     pass
+
+class EmptyQueueException(Exception):
+    pass

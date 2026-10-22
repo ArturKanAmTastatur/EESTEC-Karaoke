@@ -15,7 +15,9 @@ class QYouTubePlayer(QWidget):
         self.web_view = QWebEngineView()
         self.web_view.settings().setAttribute(
             QWebEngineSettings.WebAttribute.PlaybackRequiresUserGesture, False
-        ) #No need to interact with widget beforehand for it to work
+        )
+
+        self.volume = 50
 
         self.web_view.titleChanged.connect(self._on_title_changed)
 
@@ -27,7 +29,7 @@ class QYouTubePlayer(QWidget):
         html = f"""
             <style>
               body {{ margin:0; background:black; }}
-              #player {{ position:fixed; width:100%; height:100%; }}
+              #player {{ position:fixed; width:100%; height:100%; pointer-events:none; }}
             </style>
             <div id="player"></div>
             <script src="https://www.youtube.com/iframe_api"></script>
@@ -36,13 +38,20 @@ class QYouTubePlayer(QWidget):
               function onYouTubeIframeAPIReady() {{
                 player = new YT.Player('player', {{
                   videoId: '{video_id}',
-                  playerVars: {{ autoplay: 1, mute: {int(muted)} }},
-                  events: {{ onStateChange: e => document.title = 'state:' + e.data }}
+                  playerVars: {{ autoplay: {1},
+                    mute: {int(muted)} }},
+                  events: {{ 
+                    onReady: e => {{e.target.setVolume({self.volume}); e.target.playVideo(); }}
+                    onStateChange: e => document.title = 'state:' + e.data }}
                 }});
               }}
             </script>
             """
         self.web_view.setHtml(html, QUrl("https://localhost/"))
+
+    def set_volume(self, value):
+        self.volume = int(value)
+        self.command("setVolume", self.volume)
 
     def command(self, func, *args):
         js_args = ", ".join(json.dumps(a) for a in args)
@@ -56,3 +65,6 @@ class QYouTubePlayer(QWidget):
             self.state_changed.emit(state)
             if state == 0:
                 self.video_ended.emit()
+
+    def clear(self):
+        self.web_view.setHtml("<body style='margin:0; background:black'></body>")
