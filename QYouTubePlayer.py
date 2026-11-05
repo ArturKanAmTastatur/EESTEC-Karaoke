@@ -41,7 +41,7 @@ class QYouTubePlayer(QWidget):
                   playerVars: {{ autoplay: {1},
                     mute: {int(muted)} }},
                   events: {{ 
-                    onReady: e => {{e.target.setVolume({self.volume}); e.target.playVideo(); }}
+                    onReady: e => {{e.target.setVolume({self.volume}); e.target.playVideo(); }},
                     onStateChange: e => document.title = 'state:' + e.data }}
                 }});
               }}
