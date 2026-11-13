@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<!-- Guest song request page served at GET /qr.
+     Component 3 (issue #6) owns this page: browser fingerprint capture,
+     POST /api/song submission, and 201/403 handling. -->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EESTEC Karaoke — Song Request</title>
+    <style>
+        body { font-family: sans-serif; margin: 2rem auto; max-width: 28rem; padding: 0 1rem; }
+        input { width: 100%; padding: .6rem; margin: .4rem 0 1rem; box-sizing: border-box; }
+        button { padding: .7rem 1.4rem; font-size: 1rem; }
+    </style>
+</head>
+<body>
+    <h1>EESTEC Karaoke 🎤</h1>
+    <p>Request a song for the DJ:</p>
+
+    <!-- Placeholder form — Component 3 (issue #6) will wire this up:
+         capture browser_fp, POST to /api/song, show 201/403 status. -->
+    <form onsubmit="return false;">
+        <label for="url">Song URL (YouTube / Spotify)</label>
+        <input type="url" id="url" name="url" placeholder="https://www.youtube.com/watch?v=..." required>
+
+        <label for="title">Title</label>
+        <input type="text" id="title" name="title" placeholder="Never Gonna Give You Up" required>
+
+        <button type="submit">Send to DJ</button>
+    </form>
+</body>
+</html>
