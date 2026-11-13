@@ -1,6 +1,13 @@
+import argparse
 import ctypes
 import sys
+import threading
+import time
 from ctypes import wintypes
+
+import uvicorn
+
+from backend.app import create_app
 
 from PyQt6.QtCore import Qt
 
@@ -281,7 +288,48 @@ class PasswordDialogue(QDialog):
             self.errorLabel.setText("Wrong password")
 
 
+def start_server(host: str = "0.0.0.0", port: int = 8000) -> threading.Thread:
+    """Start the FastAPI DJ request server in a background (daemon) thread."""
+    server_app = create_app()
+    thread = threading.Thread(
+        target=uvicorn.run,
+        args=(server_app,),
+        kwargs={"host": host, "port": port, "log_level": "info"},
+        daemon=True,
+    )
+    thread.start()
+    print(f"DJ request server running at http://{host}:{port} (guest page: /qr)")
+    return thread
+
+
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(
+        description="EESTEC Karaoke — desktop app + DJ request server (one entrypoint)"
+    )
+    parser.add_argument(
+        "--server-only", action="store_true",
+        help="run only the FastAPI server (no desktop app)",
+    )
+    parser.add_argument(
+        "--desktop-only", action="store_true",
+        help="run only the PyQt desktop app (no FastAPI server)",
+    )
+    parser.add_argument("--host", default="0.0.0.0", help="server bind address")
+    parser.add_argument("--port", type=int, default=8000, help="server port")
+    args = parser.parse_args()
+
+    if not args.desktop_only:
+        start_server(args.host, args.port)
+
+    if args.server_only:
+        # Keep the process alive while the daemon uvicorn thread runs
+        try:
+            while True:
+                time.sleep(3600)
+        except KeyboardInterrupt:
+            pass
+        sys.exit(0)
+
     app = QApplication(sys.argv)
     control_panel = KaraokeMain()
     display = KaraokeDisplay()
