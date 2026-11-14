@@ -20,6 +20,7 @@ from PyQt6.QtWidgets import (
     QWidget, QAbstractItemView, QListWidgetItem, QDialog
 )
 from PyQt6.QtCore import pyqtSignal
+import os
 
 
 def verification(input_password):
@@ -334,7 +335,7 @@ if __name__ == '__main__':
     control_panel = KaraokeMain()
     display = KaraokeDisplay()
 
-    password = "111" #placeholder
+    password = os.environ.get("PASSWORD")
 
     control_panel.command_signal.connect(display.signal_receiver)
     control_panel.song_signal.connect(display.play_song)

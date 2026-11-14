@@ -54,6 +54,9 @@ class QYouTubePlayer(QWidget):
         self.command("setVolume", self.volume)
 
     def command(self, func, *args):
+        allowed_funcs = ["setVolume", "playVideo", "pauseVideo", "stopVideo", "seekTo", "setPlaybackRate", "setLoop", "setShuffle"]
+        if func not in allowed_funcs:
+            return
         js_args = ", ".join(json.dumps(a) for a in args)
         self.web_view.page().runJavaScript(
             f"if (window.player && player.{func}) player.{func}({js_args});"
