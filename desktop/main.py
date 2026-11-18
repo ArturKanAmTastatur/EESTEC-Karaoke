@@ -33,6 +33,8 @@ def verification(input_password):
 class SongCard(QWidget):
     song_delete_sygnal = pyqtSignal(object)
 
+    #TODO Connect to Data Base
+
     def __init__(self, url, title="", customer=""):
         super().__init__()
         uic.loadUi("songcard.ui", self)
@@ -56,7 +58,7 @@ class KaraokeMain(QMainWindow):
 
     def __init__(self):
         super().__init__()
-        uic.loadUi("control_panel.ui", self)
+        uic.loadUi("desktop/control_panel_v2.ui", self)
 
         self.initUI()
 
@@ -78,11 +80,6 @@ class KaraokeMain(QMainWindow):
             QAbstractItemView.SelectionMode.SingleSelection
         )
 
-        self.editURL.returnPressed.connect(self.editTitle.setFocus)
-        self.editTitle.returnPressed.connect(self.editCustomer.setFocus)
-        self.editCustomer.returnPressed.connect(self.add_song)
-
-        self.addButton.clicked.connect(self.add_song)
         self.playButton.clicked.connect(self.play_stop)
         self.nextButton.clicked.connect(self.next_song)
         self.editModeButton.clicked.connect(self.edit_mode_check)
@@ -119,7 +116,8 @@ class KaraokeMain(QMainWindow):
 
     def change_sound_volume(self, value):
         try:
-            self.command_signal.emit(2, str(value))
+            pass
+            #TODO change volume
         except Exception as e:
             print(e)
 
@@ -130,10 +128,10 @@ class KaraokeMain(QMainWindow):
                 raise EmptyQueueException
             if checked:
                 self.playButton.setText("Stop ⏸")
-                self.command_signal.emit(1, "")
+                pass #TODO Play video
             else:
                 self.playButton.setText("Play ▶")
-                self.command_signal.emit(0, "")
+                pass #TODO Stop video
         except EmptyQueueException:
             self.labelError.setText("No songs to play")
             self.playButton.setChecked(False)
@@ -146,10 +144,10 @@ class KaraokeMain(QMainWindow):
                 return
             password_check = PasswordDialogue()
             if password_check.exec():
-                self.songList.takeItem(0)
+                self.songList.takeItem(0) #TODO Rewrite when we have Data Base
                 currentSong = self.songList.itemWidget(self.songList.item(0))
                 if (currentSong == None):
-                    self.command_signal.emit(3, "")
+                    self.command_signal.emit(3, "") #TODO Clear display
                 else:
                     self.check_current_song_changed()
             else:
@@ -157,6 +155,8 @@ class KaraokeMain(QMainWindow):
         except Exception as e:
             print(e)
 
+    #TODO Reqrite add song function
+    """
     def add_song(self):
         url = self.editURL.text()
         title = self.editTitle.text()
@@ -197,6 +197,7 @@ class KaraokeMain(QMainWindow):
             self.labelError.setText("URL is invalid or video is private.")
         except Exception as e:
             print(e)
+    """
 
     def delete_song(self, card):
         for i in range(self.songList.count()):
@@ -204,9 +205,11 @@ class KaraokeMain(QMainWindow):
                 self.songList.takeItem(i)
                 card.deleteLater()
             self.check_current_song_changed()
+            #TODO Remove song from database
 
 
     def check_current_song_changed(self):
+        #TODO Rewrite this function
         currentSong = self.songList.itemWidget(self.songList.item(0))
         try:
             if (currentSong is None):
@@ -228,50 +231,10 @@ class KaraokeMain(QMainWindow):
                 self.play_stop(True)
 
             self.currentSongLabel.setText(info)
-            self.song_signal.emit(id)
+            #TODO Play video
         except Exception as e:
             print(e)
 
-
-class KaraokeDisplay(QMainWindow):
-    def __init__(self):
-        super().__init__()
-        uic.loadUi("display.ui", self)
-
-        self.setWindowTitle("EESTEC Karaoke Display")
-
-    def play_stop(self, checked):
-        try:
-            if checked == 1:
-                self.displayWidget.command("playVideo")
-            else:
-                self.displayWidget.command("pauseVideo")
-        except Exception as e:
-            print(e)
-
-    def signal_receiver(self, signal, aux):
-        if signal in [0, 1]:
-            self.play_stop(signal)
-        if signal == 2:
-            self.displayWidget.set_volume(aux)
-        if signal == 3:
-            self.displayWidget.clear()
-
-    def play_song(self, id):
-        try:
-            self.displayWidget.play_video(id)
-        except Exception as e:
-            print(e)
-
-    def keyPressEvent(self, event):
-        print(event.key())
-        if (event.key() == Qt.Key.Key_F11):
-            if self.isMaximized():
-                self.showNormal()
-            else:
-                self.showMaximized()
-        else:
-            super().keyPressEvent(event)
 
 class PasswordDialogue(QDialog):
     def __init__(self):
@@ -333,16 +296,9 @@ if __name__ == '__main__':
 
     app = QApplication(sys.argv)
     control_panel = KaraokeMain()
-    display = KaraokeDisplay()
 
     password = os.environ.get("PASSWORD")
 
-    control_panel.command_signal.connect(display.signal_receiver)
-    control_panel.song_signal.connect(display.play_song)
-
-    display.displayWidget.set_volume(control_panel.dialSound.value())
-    display.displayWidget.video_ended.connect(control_panel.next_song)
 
     control_panel.show()
-    display.show()
     app.exec()
