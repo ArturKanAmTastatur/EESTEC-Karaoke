@@ -39,3 +39,6 @@ Thumbs.db
 .env
 *.env
 
+
+# Node / React frontend build (build_frontend.py output lives in dist/)
+node_modules/
