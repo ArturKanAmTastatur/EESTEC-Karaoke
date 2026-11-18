@@ -1,0 +1,25 @@
+/* Global styles for the QR guest app — screens own their look later. */
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  background: #14141f;
+  color: #f2f2f7;
+}
+
+.app-loader {
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+}
+
+.screen {
+  max-width: 28rem;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
