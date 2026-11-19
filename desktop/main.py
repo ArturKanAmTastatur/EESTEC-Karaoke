@@ -1,13 +1,17 @@
 import argparse
 import ctypes
 import sys
-import threading
 import time
 from ctypes import wintypes
+from pathlib import Path
 
-import uvicorn
+# Make the project root importable so we can reuse the shared server
+# entrypoint (main.py) from the repository root.
+ROOT_DIR = Path(__file__).resolve().parent.parent
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
 
-from backend.app import create_app
+from main import start_server
 
 from PyQt6.QtCore import Qt
 
@@ -250,20 +254,6 @@ class PasswordDialogue(QDialog):
             self.accept()
         else:
             self.errorLabel.setText("Wrong password")
-
-
-def start_server(host: str = "0.0.0.0", port: int = 8000) -> threading.Thread:
-    """Start the FastAPI DJ request server in a background (daemon) thread."""
-    server_app = create_app()
-    thread = threading.Thread(
-        target=uvicorn.run,
-        args=(server_app,),
-        kwargs={"host": host, "port": port, "log_level": "info"},
-        daemon=True,
-    )
-    thread.start()
-    print(f"DJ request server running at http://{host}:{port} (guest page: /qr)")
-    return thread
 
 
 if __name__ == '__main__':
